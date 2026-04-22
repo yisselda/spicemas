@@ -1,0 +1,56 @@
+/* ===== Reset & Base ===== */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Grenada-inspired palette */
+    --red: #CE1126;
+    --gold: #F7D036;
+    --green: #007A3D;
+
+    /* Extended palette from costume inspo */
+    --deep-purple: #1a0a2e;
+    --hot-pink: #e8175d;
+    --coral: #ff6b4a;
+    --cyan: #00d4aa;
+    --warm-gold: #ffc857;
+
+    /* Neutrals */
+    --white: #ffffff;
+    --white-soft: rgba(255, 255, 255, 0.85);
+    --white-muted: rgba(255, 255, 255, 0.5);
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--deep-purple);
+    color: var(--white);
+    position: relative;
+}
+
+/* ===== Confetti Canvas ===== */
+#confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
