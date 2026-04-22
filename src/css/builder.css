@@ -22,14 +22,36 @@
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    touch-action: none;
 }
 
-.silhouette-toggle {
+#builder-canvas.draggable {
+    cursor: grab;
+}
+
+#builder-canvas.draggable:active {
+    cursor: grabbing;
+}
+
+.preview-buttons {
     position: absolute;
     top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.preview-buttons-right {
     right: 0.75rem;
-    width: 2.5rem;
-    height: 2.5rem;
+}
+
+.preview-buttons-left {
+    left: 0.75rem;
+}
+
+.preview-btn {
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background: rgba(0, 0, 0, 0.4);
@@ -39,22 +61,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--white-soft);
     transition: all 0.15s;
 }
 
-.silhouette-toggle:hover {
+.preview-btn:hover {
     background: rgba(0, 0, 0, 0.6);
     border-color: rgba(255, 255, 255, 0.4);
 }
 
-.silhouette-toggle.off {
+.preview-btn.off {
     opacity: 0.5;
 }
 
-.sil-toggle-icon {
-    font-size: 1.2rem;
-    line-height: 1;
-}
+/* legacy silhouette-toggle removed — replaced by .preview-btn */
 
 /* ===== Bottom Sheet Controls ===== */
 .builder-controls {
@@ -350,6 +370,55 @@
     color: var(--white-muted);
     text-align: center;
     letter-spacing: 0.05em;
+}
+
+/* ===== Curve Direction Toggle ===== */
+.curve-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+    padding: 0.5rem 0;
+}
+
+.curve-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white-muted);
+}
+
+.curve-options {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.curve-option {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.4rem 0.7rem;
+    min-height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--white-muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.curve-option:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--white-soft);
+}
+
+.curve-option.selected {
+    border-color: var(--warm-gold);
+    background: rgba(255, 200, 87, 0.1);
+    color: var(--warm-gold);
 }
 
 /* ===== Feather Color Grid ===== */

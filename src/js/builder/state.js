@@ -18,19 +18,22 @@ const state = {
     frameId: 'butterfly',
 
     // Step 2: Zones — layered feather colors (photo-based)
+    // Default preset matches the butterfly inspo image (8 feathers per side)
+    // Each layer uses density to control feather count, spread to fan out
     zones: {
         top: [
-            { featherColor: 'mint', spread: 1.0, height: 0.95, density: 0.5 },
-            { featherColor: 'shocking-pink', spread: 1.0, height: 0.85, density: 0.5 },
-            { featherColor: 'burgundy', spread: 1.0, height: 0.65, density: 0.5 },
+            { featherColor: 'mint', spread: 0.75, height: 0.85, density: 1.0 },
+            { featherColor: 'coral', spread: 1.0, height: 0.85, density: 1.0 },
+            { featherColor: 'mint', spread: 1.25, height: 0.85, density: 1.0 },
         ],
         middle: [
-            { featherColor: 'mint', spread: 1.0, height: 0.9, density: 0.5 },
-            { featherColor: 'burgundy', spread: 1.0, height: 0.7, density: 0.5 },
+            { featherColor: 'burgundy', spread: 0.9, height: 0.85, density: 1.0 },
+            { featherColor: 'burgundy', spread: 1.1, height: 0.85, density: 1.0 },
         ],
         sides: [
-            { featherColor: 'candy-pink', spread: 1.0, height: 0.85, density: 0.5 },
-            { featherColor: 'teal', spread: 1.0, height: 0.7, density: 0.5 },
+            { featherColor: 'candy-pink', spread: 0.85, height: 0.85, density: 1.0 },
+            { featherColor: 'teal', spread: 1.0, height: 0.85, density: 1.0 },
+            { featherColor: 'mint', spread: 1.15, height: 0.85, density: 1.0 },
         ],
     },
     activeZone: 'top',
@@ -41,8 +44,15 @@ const state = {
         color: '#D4AF37',
     },
 
-    // Display — wings-only by default
-    showSilhouette: false,
+    // Feather curve direction: true = tips curve outward (wings open), false = inward
+    curveOut: true,
+
+    // Display — silhouette shown by default
+    showSilhouette: true,
+    // Silhouette transform (user-adjustable via drag/pinch)
+    silX: 0,      // horizontal offset (canvas px)
+    silY: 0,      // vertical offset (canvas px)
+    silScale: 1.0, // scale multiplier
 };
 
 export function getState() {

@@ -19,7 +19,7 @@ const H = BASE_H * SCALE;
 
 // Backpack mount point — centered horizontally, upper back behind silhouette shoulders
 const MOUNT_X = W / 2;
-const MOUNT_Y = H * 0.38;
+const MOUNT_Y = H * 0.40;
 
 let canvas, ctx;
 
@@ -85,7 +85,7 @@ export function render() {
 }
 
 function drawBackground() {
-    ctx.fillStyle = '#f5f0f0';
+    ctx.fillStyle = '#eee8e4';
     ctx.fillRect(0, 0, W, H);
 }
 
@@ -112,12 +112,12 @@ function drawSilhouette(s) {
     const cached = silhouetteCache.get(cacheKey);
     if (!cached) return; // still loading
 
-    // Draw cached silhouette
-    const silH = H * 0.75;
-    const silW = silH * (cached.naturalWidth / cached.naturalHeight);
-    const silX = (W - silW) / 2;
-    const silY = H - silH - H * 0.02;
-    ctx.drawImage(cached, silX, silY, silW, silH);
+    // Draw cached silhouette with user transform
+    const baseH = H * 0.75 * s.silScale;
+    const baseW = baseH * (cached.naturalWidth / cached.naturalHeight);
+    const silX = (W - baseW) / 2 + s.silX;
+    const silY = H - baseH - H * 0.02 + s.silY;
+    ctx.drawImage(cached, silX, silY, baseW, baseH);
 }
 
 function drawFrameOutline(frame) {
@@ -171,17 +171,20 @@ function drawFeatherLayer(zone, layer) {
     const img = getFeatherImage(layer.featherColor, () => render());
     if (!img) return; // still loading
 
+    const s = getState();
     const anchors = getZoneAnchors(zone, layer.density);
 
     // Draw from outermost angle to innermost for natural overlap
     const sorted = [...anchors].sort((a, b) => b.angle - a.angle);
 
     for (const anchor of sorted) {
-        // Size varies by position — feathers near top (small angle) are taller
-        const t = (anchor.angle - zone.startAngle) / (zone.endAngle - zone.startAngle);
-        const sizeFactor = 1.0 - t * 0.3; // top feathers 100%, bottom 70%
-        const featherHeight = zone.radiusMax * layer.height * sizeFactor * SCALE;
+        // Uniform feather size across all positions
+        const featherHeight = zone.radiusMax * layer.height * SCALE;
         const angle = anchor.angle * layer.spread;
+
+        // curveOut: flip which side gets mirrored so feather tips arc outward
+        const flipRight = s.curveOut;
+        const flipLeft = !s.curveOut;
 
         // Draw feather on right side
         drawSingleFeather(
@@ -189,17 +192,18 @@ function drawFeatherLayer(zone, layer) {
             MOUNT_X + Math.sin(angle) * anchor.radiusMin * SCALE,
             MOUNT_Y - Math.cos(angle) * anchor.radiusMin * SCALE,
             angle,
-            featherHeight
+            featherHeight,
+            flipRight
         );
 
-        // Mirror on left side (flip horizontally)
+        // Mirror on left side
         drawSingleFeather(
             img,
             MOUNT_X - Math.sin(angle) * anchor.radiusMin * SCALE,
             MOUNT_Y - Math.cos(angle) * anchor.radiusMin * SCALE,
             -angle,
             featherHeight,
-            true // mirror
+            flipLeft
         );
     }
 }
@@ -261,6 +265,9 @@ function drawWatermark() {
     ctx.fillText('SPICEMAS 2026', W / 2, H - 12 * SCALE);
     ctx.restore();
 }
+
+/** Canvas scale factor (CSS px → canvas px) */
+export const CANVAS_SCALE = SCALE;
 
 /**
  * Export the canvas as a PNG blob.

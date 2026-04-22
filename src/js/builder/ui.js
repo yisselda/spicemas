@@ -94,11 +94,40 @@ function renderFrameStep(onRender) {
     }
     html += '</div>';
 
+    // Curve direction toggle
+    html += `<div class="curve-toggle">
+        <span class="curve-label">Feather curve</span>
+        <div class="curve-options">
+            <button class="curve-option ${s.curveOut ? 'selected' : ''}" data-curve="out">
+                <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M16 28 C16 28 6 20 10 8" stroke-linecap="round"/>
+                    <path d="M16 28 C16 28 26 20 22 8" stroke-linecap="round"/>
+                </svg>
+                <span>Outward</span>
+            </button>
+            <button class="curve-option ${!s.curveOut ? 'selected' : ''}" data-curve="in">
+                <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M16 28 C16 28 6 20 14 8" stroke-linecap="round"/>
+                    <path d="M16 28 C16 28 26 20 18 8" stroke-linecap="round"/>
+                </svg>
+                <span>Inward</span>
+            </button>
+        </div>
+    </div>`;
+
     stepContent.innerHTML = html;
 
     stepContent.querySelectorAll('[data-frame]').forEach(btn => {
         btn.addEventListener('click', () => {
             setState({ frameId: btn.dataset.frame });
+            renderFrameStep(onRender);
+            onRender();
+        });
+    });
+
+    stepContent.querySelectorAll('[data-curve]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            setState({ curveOut: btn.dataset.curve === 'out' });
             renderFrameStep(onRender);
             onRender();
         });
@@ -209,7 +238,7 @@ function renderLayerControls(layer, index) {
     html += `<div class="slider-group">
         <div class="slider-row">
             <span class="slider-label">Spread</span>
-            <input type="range" min="0.2" max="1" step="0.05" value="${layer.spread}" data-slider="spread">
+            <input type="range" min="0.5" max="1.5" step="0.05" value="${layer.spread}" data-slider="spread">
         </div>
         <div class="slider-row">
             <span class="slider-label">Height</span>
