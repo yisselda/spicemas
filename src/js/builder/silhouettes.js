@@ -1,488 +1,86 @@
 /**
- * Rear-facing body silhouettes for the backpack builder.
+ * Silhouettes for the backpack builder.
  *
- * 6 figures: 2 frames (A=masculine, B=feminine) x 3 weights.
- * Each figure is a SINGLE continuous outline path for clean edges.
- *
- * All share a 200x500 viewBox. Rear-facing with arms slightly out.
- * Filled with currentColor for runtime skin tone tinting.
+ * Loads real SVG silhouette assets from /public/silhouettes/.
+ * Each figure is a distinct SVG file — no scaling variants.
+ * Tinting replaces fill colors with the chosen skin tone.
  */
 
-// ── Frame A: broader shoulders, narrower hips ──
+const BASE_URL = import.meta.env.BASE_URL + 'silhouettes/';
 
-function figure1() {
-    // Frame A, slim
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 500">
-    <path d="
-        M100 10
-        C116 10 126 22 126 38
-        C126 52 118 62 108 64
-        L108 72
-        Q118 76 134 82
-        Q152 90 158 100
-        Q164 110 166 124
-        Q168 138 168 154
-        Q168 168 166 180
-        L164 190
-        Q162 196 158 200
-        Q156 202 156 210
-        L158 230
-        Q160 248 160 264
-        Q160 276 158 286
-        L156 294
-        Q154 298 150 300
-        L148 302
+// Cache for fetched raw SVG text
+const rawCache = new Map();
 
-        L148 312
-        Q150 340 152 368
-        Q154 396 154 420
-        Q154 442 152 460
-        L150 474
-        Q148 486 140 492
-        L130 498
-        Q122 500 118 496
-        Q114 492 116 484
-        L118 470
-        Q120 454 122 436
-        Q124 414 124 394
-        Q124 372 122 348
-        L118 320
-        Q116 308 112 300
-
-        L100 298
-
-        L88 300
-        Q84 308 82 320
-        L78 348
-        Q76 372 76 394
-        Q76 414 78 436
-        Q80 454 82 470
-        L84 484
-        Q86 492 82 496
-        Q78 500 70 498
-        L60 492
-        Q52 486 50 474
-        L48 460
-        Q46 442 46 420
-        Q46 396 48 368
-        Q50 340 52 312
-
-        L52 302
-        L50 300
-        Q46 298 44 294
-        L42 286
-        Q40 276 40 264
-        Q40 248 42 230
-        L44 210
-        Q44 202 42 200
-        Q38 196 36 190
-        L34 180
-        Q32 168 32 154
-        Q32 138 34 124
-        Q36 110 42 100
-        Q48 90 66 82
-        Q82 76 92 72
-        L92 64
-        C82 62 74 52 74 38
-        C74 22 84 10 100 10 Z
-    " fill="currentColor"/>
-</svg>`;
+async function fetchSvg(filename) {
+    if (rawCache.has(filename)) return rawCache.get(filename);
+    const resp = await fetch(BASE_URL + filename);
+    const text = await resp.text();
+    rawCache.set(filename, text);
+    return text;
 }
 
-function figure2() {
-    // Frame A, medium
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 500">
-    <path d="
-        M100 10
-        C117 10 128 22 128 39
-        C128 53 120 63 110 66
-        L110 74
-        Q122 78 140 86
-        Q158 94 166 106
-        Q172 118 174 134
-        Q176 150 176 168
-        Q176 184 174 196
-        L172 208
-        Q170 216 164 220
-        Q162 224 162 232
-        L164 254
-        Q166 274 166 290
-        Q166 302 164 312
-        L160 322
-        Q156 330 152 332
+/**
+ * Create a tinted SVG string from a silhouette figure + color.
+ * Handles both Adobe Illustrator and potrace SVG formats.
+ */
+export async function getSilhouetteSvg(figure, color) {
+    const raw = await fetchSvg(figure.file);
 
-        L152 342
-        Q154 372 156 400
-        Q158 428 158 452
-        Q158 472 156 484
-        L152 492
-        Q148 498 138 500
-        L126 500
-        Q118 498 116 492
-        Q114 486 116 478
-        L120 460
-        Q122 444 124 424
-        Q126 402 126 382
-        Q126 360 124 336
-        L120 312
-        Q118 302 114 296
+    // Extract viewBox
+    const vbMatch = raw.match(/viewBox="([^"]+)"/);
+    const viewBox = vbMatch ? vbMatch[1] : '0 0 360 740';
 
-        L100 294
+    // Extract inner content (everything between <svg> tags)
+    const innerMatch = raw.match(/<svg[^>]*>([\s\S]*)<\/svg>/i);
+    if (!innerMatch) return raw;
 
-        L86 296
-        Q82 302 80 312
-        L76 336
-        Q74 360 74 382
-        Q74 402 76 424
-        Q78 444 80 460
-        L84 478
-        Q86 486 84 492
-        Q82 498 74 500
-        L62 500
-        Q52 498 48 492
-        L44 484
-        Q42 472 42 452
-        Q42 428 44 400
-        Q46 372 48 342
+    let inner = innerMatch[1];
 
-        L48 332
-        Q44 330 40 322
-        L36 312
-        Q34 302 34 290
-        Q34 274 36 254
-        L38 232
-        Q38 224 36 220
-        Q30 216 28 208
-        L26 196
-        Q24 184 24 168
-        Q24 150 26 134
-        Q28 118 34 106
-        Q42 94 60 86
-        Q78 78 90 74
-        L90 66
-        C80 63 72 53 72 39
-        C72 22 83 10 100 10 Z
-    " fill="currentColor"/>
-</svg>`;
+    // Strip metadata, doctype, xml declarations
+    inner = inner.replace(/<metadata[\s\S]*?<\/metadata>/gi, '');
+
+    // Replace all fill colors with the skin tone
+    inner = inner
+        .replace(/fill="[^"]*"/g, `fill="${color}"`)
+        .replace(/fill:\s*[^;"]+/g, `fill: ${color}`);
+
+    // Parse viewBox dimensions for explicit width/height (needed for canvas rasterization)
+    const [, , vbW, vbH] = viewBox.split(/\s+/).map(Number);
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${vbW}" height="${vbH}">${inner}</svg>`;
 }
 
-function figure3() {
-    // Frame A, full
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 500">
-    <path d="
-        M100 10
-        C118 10 130 23 130 40
-        C130 55 122 65 112 68
-        L112 76
-        Q126 80 146 90
-        Q164 100 172 114
-        Q180 128 182 148
-        Q184 166 184 186
-        Q184 204 182 218
-        L178 232
-        Q174 242 170 246
-        Q168 250 168 260
-        L170 284
-        Q172 306 172 324
-        Q172 340 170 352
-        L166 364
-        Q160 374 154 378
+/**
+ * Create an Image element from a silhouette figure + color.
+ * Returns a promise that resolves to a ready-to-draw HTMLImageElement.
+ */
+export async function getSilhouetteImage(figure, color) {
+    const svgStr = await getSilhouetteSvg(figure, color);
+    const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
 
-        L154 388
-        Q156 418 158 446
-        Q160 470 160 488
-        Q158 496 150 500
-        L134 500
-        Q124 498 122 492
-        Q120 486 122 478
-        L126 456
-        Q128 436 130 414
-        Q130 392 130 372
-        Q130 348 126 324
-        L122 302
-        Q118 292 114 286
-
-        L100 284
-
-        L86 286
-        Q82 292 78 302
-        L74 324
-        Q70 348 70 372
-        Q70 392 70 414
-        Q72 436 74 456
-        L78 478
-        Q80 486 78 492
-        Q76 498 66 500
-        L50 500
-        Q42 496 40 488
-        Q40 470 42 446
-        Q44 418 46 388
-
-        L46 378
-        Q40 374 34 364
-        L30 352
-        Q28 340 28 324
-        Q28 306 30 284
-        L32 260
-        Q32 250 30 246
-        Q26 242 22 232
-        L18 218
-        Q16 204 16 186
-        Q16 166 18 148
-        Q20 128 28 114
-        Q36 100 54 90
-        Q74 80 88 76
-        L88 68
-        C78 65 70 55 70 40
-        C70 23 82 10 100 10 Z
-    " fill="currentColor"/>
-</svg>`;
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(img);
+        };
+        img.onerror = reject;
+        img.src = url;
+    });
 }
 
-// ── Frame B: narrower shoulders, defined waist, wider hips ──
-
-function figure4() {
-    // Frame B, slim
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 500">
-    <path d="
-        M100 10
-        C114 10 124 22 124 37
-        C124 50 116 60 108 63
-        L108 70
-        Q118 74 130 80
-        Q146 88 152 98
-        Q158 108 160 120
-        Q162 132 162 146
-        Q162 158 160 168
-        L158 176
-        Q156 182 152 186
-        Q150 190 150 198
-        Q150 206 152 216
-        Q154 228 152 240
-        Q150 252 146 260
-        Q140 270 136 280
-        Q134 292 136 306
-        Q140 320 146 332
-        Q152 342 156 350
-        Q160 358 160 366
-
-        L160 376
-        Q162 404 164 430
-        Q164 454 162 472
-        L158 486
-        Q154 494 144 498
-        L132 500
-        Q124 498 122 492
-        Q120 486 122 478
-        L124 462
-        Q126 444 128 424
-        Q128 404 128 384
-        Q128 364 126 342
-        L122 318
-        Q118 306 114 298
-
-        L100 296
-
-        L86 298
-        Q82 306 78 318
-        L74 342
-        Q72 364 72 384
-        Q72 404 72 424
-        Q74 444 76 462
-        L78 478
-        Q80 486 78 492
-        Q76 498 68 500
-        L56 498
-        Q46 494 42 486
-        L38 472
-        Q36 454 36 430
-        Q38 404 40 376
-
-        L40 366
-        Q40 358 44 350
-        Q48 342 54 332
-        Q60 320 64 306
-        Q66 292 64 280
-        Q60 270 54 260
-        Q50 252 48 240
-        Q46 228 48 216
-        Q50 206 50 198
-        Q50 190 48 186
-        Q44 182 42 176
-        L40 168
-        Q38 158 38 146
-        Q38 132 40 120
-        Q42 108 48 98
-        Q54 88 70 80
-        Q82 74 92 70
-        L92 63
-        C84 60 76 50 76 37
-        C76 22 86 10 100 10 Z
-    " fill="currentColor"/>
-</svg>`;
-}
-
-function figure5() {
-    // Frame B, medium
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 500">
-    <path d="
-        M100 10
-        C115 10 126 22 126 38
-        C126 52 118 62 109 64
-        L109 72
-        Q120 76 134 82
-        Q150 90 158 102
-        Q164 114 166 128
-        Q168 142 168 158
-        Q168 172 166 182
-        L162 192
-        Q158 200 154 204
-        Q152 208 152 218
-        Q152 228 154 240
-        Q156 254 154 268
-        Q150 280 144 290
-        Q136 302 132 314
-        Q130 328 132 344
-        Q138 360 146 374
-        Q154 386 160 396
-        Q166 406 166 414
-
-        L166 424
-        Q168 452 168 474
-        Q166 490 158 496
-        L142 500
-        Q132 498 130 492
-        Q128 486 130 478
-        L132 460
-        Q134 442 136 420
-        Q136 400 136 380
-        Q136 356 132 332
-        L128 308
-        Q124 298 118 292
-
-        L100 290
-
-        L82 292
-        Q76 298 72 308
-        L68 332
-        Q64 356 64 380
-        Q64 400 64 420
-        Q66 442 68 460
-        L70 478
-        Q72 486 70 492
-        Q68 498 58 500
-        L42 496
-        Q34 490 32 474
-        Q32 452 34 424
-
-        L34 414
-        Q34 406 40 396
-        Q46 386 54 374
-        Q62 360 68 344
-        Q70 328 68 314
-        Q64 302 56 290
-        Q50 280 46 268
-        Q44 254 46 240
-        Q48 228 48 218
-        Q48 208 46 204
-        Q42 200 38 192
-        L34 182
-        Q32 172 32 158
-        Q32 142 34 128
-        Q36 114 42 102
-        Q50 90 66 82
-        Q80 76 91 72
-        L91 64
-        C82 62 74 52 74 38
-        C74 22 85 10 100 10 Z
-    " fill="currentColor"/>
-</svg>`;
-}
-
-function figure6() {
-    // Frame B, full
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 500">
-    <path d="
-        M100 10
-        C116 10 128 23 128 39
-        C128 54 120 64 110 66
-        L110 74
-        Q122 78 138 86
-        Q156 96 164 110
-        Q170 124 172 142
-        Q174 158 174 176
-        Q174 192 172 204
-        L168 216
-        Q164 226 158 230
-        Q156 234 156 246
-        Q156 258 158 272
-        Q160 288 158 304
-        Q154 318 146 330
-        Q136 344 130 358
-        Q126 374 128 392
-        Q134 410 144 424
-        Q156 438 164 450
-        Q172 462 172 472
-
-        L172 480
-        Q172 492 164 498
-        L146 500
-        Q134 498 132 492
-        Q130 486 132 478
-        L136 456
-        Q138 436 140 414
-        Q140 394 140 374
-        Q140 350 136 326
-        L130 300
-        Q126 290 120 284
-
-        L100 282
-
-        L80 284
-        Q74 290 70 300
-        L64 326
-        Q60 350 60 374
-        Q60 394 60 414
-        Q62 436 64 456
-        L68 478
-        Q70 486 68 492
-        Q66 498 54 500
-        L36 498
-        Q28 492 28 480
-
-        L28 472
-        Q28 462 36 450
-        Q44 438 56 424
-        Q66 410 72 392
-        Q74 374 70 358
-        Q64 344 54 330
-        Q46 318 42 304
-        Q40 288 42 272
-        Q44 258 44 246
-        Q44 234 42 230
-        Q36 226 32 216
-        L28 204
-        Q26 192 26 176
-        Q26 158 28 142
-        Q30 124 36 110
-        Q44 96 62 86
-        Q78 78 90 74
-        L90 66
-        C80 64 72 54 72 39
-        C72 23 84 10 100 10 Z
-    " fill="currentColor"/>
-</svg>`;
+/**
+ * Generate a small preview SVG string for the picker UI.
+ */
+export async function getPreviewSvg(figure) {
+    return getSilhouetteSvg(figure, '#c0c0c0');
 }
 
 /**
  * All silhouettes for the picker UI.
- * The backpack mount point is consistent: center-x=100, upper-back y≈100
+ * Each is a distinct SVG file, labeled Fig 1–3.
  */
 export const SILHOUETTES = [
-    { id: 'fig1', label: 'Fig 1', svg: figure1, mountY: 100 },
-    { id: 'fig2', label: 'Fig 2', svg: figure2, mountY: 100 },
-    { id: 'fig3', label: 'Fig 3', svg: figure3, mountY: 100 },
-    { id: 'fig4', label: 'Fig 4', svg: figure4, mountY: 100 },
-    { id: 'fig5', label: 'Fig 5', svg: figure5, mountY: 100 },
-    { id: 'fig6', label: 'Fig 6', svg: figure6, mountY: 100 },
+    { id: 'fig1', label: 'Fig 1', file: 'figure_a.svg' },
 ];

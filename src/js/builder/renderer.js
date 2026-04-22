@@ -1,14 +1,14 @@
 /**
  * Canvas renderer for the backpack builder.
  *
- * Draws: background → silhouette → backpack frame → feather layers → gems → watermark.
- * Uses an offscreen canvas to rasterize and tint SVG feathers.
+ * Draws: background → feather layers → silhouette → gems → watermark.
+ * Uses photo-based feather PNGs with transparent backgrounds.
  */
 
 import { getState } from './state.js';
-import { SILHOUETTES } from './silhouettes.js';
+import { SILHOUETTES, getSilhouetteImage } from './silhouettes.js';
 import { FRAMES, getZoneAnchors } from './frames.js';
-import { FEATHER_TYPES } from './feathers.js';
+import { getFeatherImage, preloadFeathers } from './feathers.js';
 
 // Canvas dimensions (2x for retina)
 const BASE_W = 400;
@@ -17,9 +17,9 @@ const SCALE = 2;
 const W = BASE_W * SCALE;
 const H = BASE_H * SCALE;
 
-// Backpack center relative to canvas
+// Backpack mount point — centered horizontally, upper back behind silhouette shoulders
 const MOUNT_X = W / 2;
-const MOUNT_Y = H * 0.35;
+const MOUNT_Y = H * 0.38;
 
 let canvas, ctx;
 
@@ -30,6 +30,16 @@ export function initRenderer(canvasEl) {
     canvas.style.width = BASE_W + 'px';
     canvas.style.height = BASE_H + 'px';
     ctx = canvas.getContext('2d');
+
+    // Preload default feather colors
+    const s = getState();
+    const colors = new Set();
+    for (const zone of Object.values(s.zones)) {
+        for (const layer of zone) {
+            colors.add(layer.featherColor);
+        }
+    }
+    preloadFeathers([...colors], () => render());
 }
 
 export function render() {
@@ -41,12 +51,16 @@ export function render() {
     // Background
     drawBackground();
 
-    // Silhouette
-    drawSilhouette(s);
-
-    // Feather layers (back-to-front: sides, middle, top)
+    // Feather layers behind silhouette (back-to-front: sides, middle, top)
     const frame = FRAMES.find(f => f.id === s.frameId);
     if (frame) {
+        const hasFeathers = ['top', 'middle', 'sides'].some(z => s.zones[z].length > 0);
+
+        if (!hasFeathers) {
+            // Show frame outline when no feathers added yet
+            drawFrameOutline(frame);
+        }
+
         for (const zoneName of ['sides', 'middle', 'top']) {
             const layers = s.zones[zoneName];
             const zone = frame.zones[zoneName];
@@ -54,11 +68,16 @@ export function render() {
                 drawFeatherLayer(zone, layer);
             }
         }
+    }
 
-        // Gems
-        if (s.gems.enabled) {
-            drawGems(frame, s.gems.color);
-        }
+    // Silhouette in front of feathers
+    if (s.showSilhouette) {
+        drawSilhouette(s);
+    }
+
+    // Gems on top of everything
+    if (frame && s.gems.enabled) {
+        drawGems(frame, s.gems.color);
     }
 
     // Watermark
@@ -66,122 +85,142 @@ export function render() {
 }
 
 function drawBackground() {
-    const grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.7);
-    grad.addColorStop(0, '#2d1458');
-    grad.addColorStop(1, '#1a0a2e');
-    ctx.fillStyle = grad;
+    ctx.fillStyle = '#f5f0f0';
     ctx.fillRect(0, 0, W, H);
 }
+
+// Cache for silhouette images keyed by id + skinTone
+const silhouetteCache = new Map();
 
 function drawSilhouette(s) {
     const sil = SILHOUETTES.find(si => si.id === s.silhouetteId);
     if (!sil) return;
 
-    const svgStr = sil.svg().replace(/currentColor/g, s.skinTone);
-    const img = new Image();
-    const blob = new Blob([svgStr], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
+    const cacheKey = `${sil.id}_${s.skinTone}`;
 
-    // We need to draw synchronously for the render pipeline,
-    // so we cache the image after first load.
-    if (!sil._cachedImg || sil._cachedTone !== s.skinTone) {
-        sil._cachedTone = s.skinTone;
-        sil._cachedImg = null;
+    if (!silhouetteCache.has(cacheKey)) {
+        // Mark as loading to avoid duplicate fetches
+        silhouetteCache.set(cacheKey, null);
 
-        img.onload = () => {
-            sil._cachedImg = img;
-            URL.revokeObjectURL(url);
+        getSilhouetteImage(sil, s.skinTone).then(img => {
+            silhouetteCache.set(cacheKey, img);
             render(); // re-render once loaded
-        };
-        img.src = url;
-        return; // skip this frame, re-render on load
+        });
+        return; // skip this frame
     }
+
+    const cached = silhouetteCache.get(cacheKey);
+    if (!cached) return; // still loading
 
     // Draw cached silhouette
     const silH = H * 0.75;
-    const silW = silH * (200 / 500);
+    const silW = silH * (cached.naturalWidth / cached.naturalHeight);
     const silX = (W - silW) / 2;
     const silY = H - silH - H * 0.02;
-    ctx.drawImage(sil._cachedImg, silX, silY, silW, silH);
+    ctx.drawImage(cached, silX, silY, silW, silH);
+}
+
+function drawFrameOutline(frame) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 4]);
+
+    const zoneColors = {
+        top: 'rgba(255, 180, 100, 0.25)',
+        middle: 'rgba(255, 100, 180, 0.2)',
+        sides: 'rgba(100, 200, 255, 0.2)',
+    };
+
+    for (const zoneName of ['sides', 'middle', 'top']) {
+        const zone = frame.zones[zoneName];
+        ctx.fillStyle = zoneColors[zoneName];
+
+        // Draw zone arc area on right side
+        ctx.beginPath();
+        ctx.moveTo(MOUNT_X, MOUNT_Y);
+        for (let a = zone.startAngle; a <= zone.endAngle; a += 0.05) {
+            ctx.lineTo(
+                MOUNT_X + Math.sin(a) * zone.radiusMax * SCALE,
+                MOUNT_Y - Math.cos(a) * zone.radiusMax * SCALE
+            );
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Mirror on left side
+        ctx.beginPath();
+        ctx.moveTo(MOUNT_X, MOUNT_Y);
+        for (let a = zone.startAngle; a <= zone.endAngle; a += 0.05) {
+            ctx.lineTo(
+                MOUNT_X - Math.sin(a) * zone.radiusMax * SCALE,
+                MOUNT_Y - Math.cos(a) * zone.radiusMax * SCALE
+            );
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    ctx.setLineDash([]);
+    ctx.restore();
 }
 
 function drawFeatherLayer(zone, layer) {
-    const featherType = FEATHER_TYPES.find(f => f.id === layer.featherId);
-    if (!featherType) return;
+    const img = getFeatherImage(layer.featherColor, () => render());
+    if (!img) return; // still loading
 
     const anchors = getZoneAnchors(zone, layer.density);
-    const featherHeight = zone.radiusMax * layer.height * SCALE;
 
-    for (const anchor of anchors) {
+    // Draw from outermost angle to innermost for natural overlap
+    const sorted = [...anchors].sort((a, b) => b.angle - a.angle);
+
+    for (const anchor of sorted) {
+        // Size varies by position — feathers near top (small angle) are taller
+        const t = (anchor.angle - zone.startAngle) / (zone.endAngle - zone.startAngle);
+        const sizeFactor = 1.0 - t * 0.3; // top feathers 100%, bottom 70%
+        const featherHeight = zone.radiusMax * layer.height * sizeFactor * SCALE;
+        const angle = anchor.angle * layer.spread;
+
         // Draw feather on right side
         drawSingleFeather(
-            featherType,
-            layer.color,
-            MOUNT_X + Math.sin(anchor.angle * layer.spread) * anchor.radiusMin * SCALE,
-            MOUNT_Y - Math.cos(anchor.angle * layer.spread) * anchor.radiusMin * SCALE,
-            anchor.angle * layer.spread,
+            img,
+            MOUNT_X + Math.sin(angle) * anchor.radiusMin * SCALE,
+            MOUNT_Y - Math.cos(angle) * anchor.radiusMin * SCALE,
+            angle,
             featherHeight
         );
 
-        // Mirror on left side
+        // Mirror on left side (flip horizontally)
         drawSingleFeather(
-            featherType,
-            layer.color,
-            MOUNT_X - Math.sin(anchor.angle * layer.spread) * anchor.radiusMin * SCALE,
-            MOUNT_Y - Math.cos(anchor.angle * layer.spread) * anchor.radiusMin * SCALE,
-            -anchor.angle * layer.spread,
-            featherHeight
+            img,
+            MOUNT_X - Math.sin(angle) * anchor.radiusMin * SCALE,
+            MOUNT_Y - Math.cos(angle) * anchor.radiusMin * SCALE,
+            -angle,
+            featherHeight,
+            true // mirror
         );
     }
 }
 
-// Cache for tinted feather images
-const featherCache = new Map();
-
-function drawSingleFeather(featherType, color, x, y, angle, height) {
-    const cacheKey = `${featherType.id}_${color}_${Math.round(height)}`;
-
-    if (!featherCache.has(cacheKey)) {
-        // Create tinted feather via offscreen canvas
-        const svgStr = featherType.svg();
-        const img = new Image();
-        const blob = new Blob([svgStr], { type: 'image/svg+xml' });
-        const url = URL.createObjectURL(blob);
-
-        img.onload = () => {
-            // Draw SVG to offscreen canvas
-            const offW = Math.round(height * 0.3);
-            const offH = Math.round(height);
-            const off = new OffscreenCanvas(offW, offH);
-            const offCtx = off.getContext('2d');
-
-            offCtx.drawImage(img, 0, 0, offW, offH);
-
-            // Tint: draw color with source-in composite
-            offCtx.globalCompositeOperation = 'source-in';
-            offCtx.fillStyle = color;
-            offCtx.fillRect(0, 0, offW, offH);
-
-            // Add some luminosity variation back
-            offCtx.globalCompositeOperation = 'luminosity';
-            offCtx.drawImage(img, 0, 0, offW, offH);
-
-            featherCache.set(cacheKey, off);
-            URL.revokeObjectURL(url);
-            render(); // re-render with cached feather
-        };
-        img.src = url;
-        return;
-    }
-
-    const cached = featherCache.get(cacheKey);
-    const fw = cached.width;
-    const fh = cached.height;
+function drawSingleFeather(img, x, y, angle, height, mirror = false) {
+    // Compute width from image aspect ratio
+    const aspect = img.naturalWidth / img.naturalHeight;
+    const fw = height * aspect;
+    const fh = height;
 
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle);
-    ctx.drawImage(cached, -fw / 2, -fh, fw, fh);
+    if (mirror) {
+        ctx.scale(-1, 1);
+    }
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.18)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 3;
+    ctx.drawImage(img, -fw / 2, -fh, fw, fh);
     ctx.restore();
 }
 
@@ -214,9 +253,10 @@ function drawGems(frame, color) {
 }
 
 function drawWatermark() {
+    const s = getState();
     ctx.save();
     ctx.font = `${11 * SCALE}px Inter, sans-serif`;
-    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
     ctx.textAlign = 'center';
     ctx.fillText('SPICEMAS 2026', W / 2, H - 12 * SCALE);
     ctx.restore();

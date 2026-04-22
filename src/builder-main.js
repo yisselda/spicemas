@@ -3,10 +3,20 @@ import './css/builder.css';
 
 import { initRenderer, render, exportBlob } from './js/builder/renderer.js';
 import { initUI } from './js/builder/ui.js';
+import { getState, setState } from './js/builder/state.js';
 
 const canvas = document.getElementById('builder-canvas');
 initRenderer(canvas);
 initUI(render);
+
+// Silhouette toggle
+const silToggle = document.getElementById('sil-toggle');
+silToggle.addEventListener('click', () => {
+    const show = !getState().showSilhouette;
+    setState({ showSilhouette: show });
+    silToggle.classList.toggle('off', !show);
+    render();
+});
 
 // Export handlers
 document.addEventListener('backpack:download', async () => {

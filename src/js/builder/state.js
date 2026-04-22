@@ -5,34 +5,44 @@
  */
 
 import { FRAMES } from './frames.js';
-import { SILHOUETTES } from './silhouettes.js';
-import { skinTonePalette } from './palette.js';
-
 const listeners = new Set();
 
 const state = {
-    step: 1, // 1-5: silhouette, frame, zones, accents, preview
+    step: 1, // 1-4: frame, zones, accents, preview
 
-    // Step 1: Silhouette
-    silhouetteId: SILHOUETTES[0].id,
-    skinTone: skinTonePalette[4].hex,
+    // Silhouette (fixed for now)
+    silhouetteId: 'fig1',
+    skinTone: '#000000',
 
-    // Step 2: Frame
-    frameId: FRAMES[0].id,
+    // Step 1: Frame
+    frameId: 'butterfly',
 
-    // Step 3: Zones — each zone has an array of feather layers
+    // Step 2: Zones — layered feather colors (photo-based)
     zones: {
-        top: [],    // [{ featherId, color, spread, height, density }]
-        middle: [],
-        sides: [],
+        top: [
+            { featherColor: 'mint', spread: 1.0, height: 0.95, density: 0.5 },
+            { featherColor: 'shocking-pink', spread: 1.0, height: 0.85, density: 0.5 },
+            { featherColor: 'burgundy', spread: 1.0, height: 0.65, density: 0.5 },
+        ],
+        middle: [
+            { featherColor: 'mint', spread: 1.0, height: 0.9, density: 0.5 },
+            { featherColor: 'burgundy', spread: 1.0, height: 0.7, density: 0.5 },
+        ],
+        sides: [
+            { featherColor: 'candy-pink', spread: 1.0, height: 0.85, density: 0.5 },
+            { featherColor: 'teal', spread: 1.0, height: 0.7, density: 0.5 },
+        ],
     },
     activeZone: 'top',
 
-    // Step 4: Accents
+    // Step 3: Accents
     gems: {
         enabled: false,
-        color: '#D4AF37', // default gold
+        color: '#D4AF37',
     },
+
+    // Display — wings-only by default
+    showSilhouette: false,
 };
 
 export function getState() {
@@ -54,8 +64,7 @@ export function setZoneLayer(zone, index, updates) {
 
 export function addZoneLayer(zone, layer) {
     state.zones[zone].push({
-        featherId: 'ostrich',
-        color: '#CE1126',
+        featherColor: 'red',
         spread: 0.7,
         height: 0.8,
         density: 0.7,

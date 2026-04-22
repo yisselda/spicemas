@@ -1,132 +1,39 @@
 /**
- * Caribbean flag color palette, organized by country.
- * Each entry: { country, colors: [{ name, hex }] }
+ * Curated feather color palette — flat, simple, carnival-ready.
  */
-export const caribbeanPalette = [
-    {
-        country: 'Grenada',
-        colors: [
-            { name: 'Red', hex: '#CE1126' },
-            { name: 'Gold', hex: '#F7D036' },
-            { name: 'Green', hex: '#007A3D' },
-        ],
-    },
-    {
-        country: 'Trinidad & Tobago',
-        colors: [
-            { name: 'Red', hex: '#DA121A' },
-            { name: 'White', hex: '#FFFFFF' },
-            { name: 'Black', hex: '#1C1C1C' },
-        ],
-    },
-    {
-        country: 'Jamaica',
-        colors: [
-            { name: 'Black', hex: '#1A1A1A' },
-            { name: 'Gold', hex: '#FED100' },
-            { name: 'Green', hex: '#009B3A' },
-        ],
-    },
-    {
-        country: 'Barbados',
-        colors: [
-            { name: 'Ultramarine', hex: '#00267F' },
-            { name: 'Gold', hex: '#FFC726' },
-        ],
-    },
-    {
-        country: 'St. Lucia',
-        colors: [
-            { name: 'Cerulean', hex: '#65CFFF' },
-            { name: 'Gold', hex: '#FCD116' },
-            { name: 'Black', hex: '#141414' },
-            { name: 'White', hex: '#FFFFFF' },
-        ],
-    },
-    {
-        country: 'St. Vincent',
-        colors: [
-            { name: 'Blue', hex: '#0072C6' },
-            { name: 'Gold', hex: '#FCD116' },
-            { name: 'Green', hex: '#009E49' },
-        ],
-    },
-    {
-        country: 'Antigua & Barbuda',
-        colors: [
-            { name: 'Red', hex: '#CE1126' },
-            { name: 'Blue', hex: '#0072C6' },
-            { name: 'Gold', hex: '#FFC726' },
-            { name: 'Black', hex: '#1A1A1A' },
-            { name: 'White', hex: '#FFFFFF' },
-        ],
-    },
-    {
-        country: 'Bahamas',
-        colors: [
-            { name: 'Aquamarine', hex: '#00ABC9' },
-            { name: 'Gold', hex: '#FFC726' },
-            { name: 'Black', hex: '#1A1A1A' },
-        ],
-    },
-    {
-        country: 'Dominica',
-        colors: [
-            { name: 'Green', hex: '#006B3F' },
-            { name: 'Yellow', hex: '#FCD116' },
-            { name: 'Black', hex: '#1A1A1A' },
-            { name: 'White', hex: '#FFFFFF' },
-            { name: 'Red', hex: '#D41C30' },
-            { name: 'Purple', hex: '#6B3FA0' },
-        ],
-    },
-    {
-        country: 'Haiti',
-        colors: [
-            { name: 'Blue', hex: '#00209F' },
-            { name: 'Red', hex: '#D21034' },
-        ],
-    },
-    {
-        country: 'Dominican Republic',
-        colors: [
-            { name: 'Blue', hex: '#002D62' },
-            { name: 'Red', hex: '#CE1126' },
-            { name: 'White', hex: '#FFFFFF' },
-        ],
-    },
-    {
-        country: 'Cuba',
-        colors: [
-            { name: 'Blue', hex: '#002A8F' },
-            { name: 'White', hex: '#FFFFFF' },
-            { name: 'Red', hex: '#CF142B' },
-        ],
-    },
-    {
-        country: 'Guyana',
-        colors: [
-            { name: 'Green', hex: '#009E49' },
-            { name: 'Gold', hex: '#FCD116' },
-            { name: 'Red', hex: '#CE1126' },
-            { name: 'Black', hex: '#1A1A1A' },
-            { name: 'White', hex: '#FFFFFF' },
-        ],
-    },
-    {
-        country: 'St. Kitts & Nevis',
-        colors: [
-            { name: 'Green', hex: '#009E49' },
-            { name: 'Red', hex: '#CE1126' },
-            { name: 'Yellow', hex: '#FCD116' },
-            { name: 'Black', hex: '#1A1A1A' },
-            { name: 'White', hex: '#FFFFFF' },
-        ],
-    },
+export const featherColors = [
+    // Warm
+    { name: 'Coral', hex: '#FF6B6B' },
+    { name: 'Salmon', hex: '#FA8072' },
+    { name: 'Hot Pink', hex: '#E8175D' },
+    { name: 'Soft Pink', hex: '#FFB6C1' },
+    { name: 'Magenta', hex: '#D946EF' },
+    { name: 'Red', hex: '#CE1126' },
+    { name: 'Burgundy', hex: '#800020' },
+    { name: 'Orange', hex: '#F97316' },
+    // Gold / Yellow
+    { name: 'Gold', hex: '#D4AF37' },
+    { name: 'Yellow', hex: '#FCD116' },
+    { name: 'Champagne', hex: '#F7E7CE' },
+    // Cool
+    { name: 'Teal', hex: '#00897B' },
+    { name: 'Mint', hex: '#98D8C8' },
+    { name: 'Sage', hex: '#87AE73' },
+    { name: 'Green', hex: '#009E49' },
+    { name: 'Turquoise', hex: '#06B6D4' },
+    { name: 'Sky Blue', hex: '#38BDF8' },
+    { name: 'Royal Blue', hex: '#0072C6' },
+    { name: 'Navy', hex: '#002D62' },
+    // Neutral / Metallic
+    { name: 'Purple', hex: '#A855F7' },
+    { name: 'Lavender', hex: '#C4B5FD' },
+    { name: 'White', hex: '#FFFFFF' },
+    { name: 'Silver', hex: '#C0C0C0' },
+    { name: 'Black', hex: '#1A1A1A' },
 ];
 
 /**
- * Metallic colors for accents
+ * Metallic colors for gem accents
  */
 export const metallicPalette = [
     { name: 'Gold', hex: '#D4AF37' },
@@ -138,62 +45,60 @@ export const metallicPalette = [
 ];
 
 /**
- * Skin tone palette for silhouettes
+ * Skin tone gradient stops.
+ * Position 0 = darkest, 100 = lightest.
+ * More stops in the dark-to-medium range for finer control.
  */
-export const skinTonePalette = [
-    { name: 'Tone 1', hex: '#F8D5C2' },
-    { name: 'Tone 2', hex: '#E8B98D' },
-    { name: 'Tone 3', hex: '#D4956B' },
-    { name: 'Tone 4', hex: '#C07840' },
-    { name: 'Tone 5', hex: '#8D5524' },
-    { name: 'Tone 6', hex: '#6B3E1F' },
-    { name: 'Tone 7', hex: '#4A2912' },
-    { name: 'Tone 8', hex: '#3B1F0B' },
+export const skinToneStops = [
+    { pos: 0,   r: 45,  g: 25,  b: 10  }, // #2D190A deep espresso
+    { pos: 8,   r: 59,  g: 31,  b: 11  }, // #3B1F0B
+    { pos: 16,  r: 74,  g: 41,  b: 18  }, // #4A2912
+    { pos: 24,  r: 90,  g: 52,  b: 22  }, // #5A3416
+    { pos: 32,  r: 107, g: 62,  b: 31  }, // #6B3E1F
+    { pos: 40,  r: 120, g: 72,  b: 36  }, // #784824
+    { pos: 48,  r: 141, g: 85,  b: 36  }, // #8D5524
+    { pos: 56,  r: 165, g: 102, b: 45  }, // #A5662D
+    { pos: 64,  r: 192, g: 120, b: 64  }, // #C07840
+    { pos: 72,  r: 212, g: 149, b: 107 }, // #D4956B
+    { pos: 80,  r: 224, g: 172, b: 130 }, // #E0AC82
+    { pos: 88,  r: 232, g: 185, b: 141 }, // #E8B98D
+    { pos: 96,  r: 243, g: 209, b: 183 }, // #F3D1B7
+    { pos: 100, r: 248, g: 213, b: 194 }, // #F8D5C2
 ];
 
 /**
- * Extra carnival colors (hot pinks, teals, etc. not in any flag)
+ * Interpolate skin tone stops at a given position (0–100).
+ * Returns a hex color string.
  */
-export const carnivalExtras = [
-    { name: 'Hot Pink', hex: '#E8175D' },
-    { name: 'Coral', hex: '#FF6B4A' },
-    { name: 'Cyan', hex: '#00D4AA' },
-    { name: 'Sky Blue', hex: '#38BDF8' },
-    { name: 'Purple', hex: '#A855F7' },
-    { name: 'Magenta', hex: '#D946EF' },
-    { name: 'Turquoise', hex: '#06B6D4' },
-    { name: 'Lime', hex: '#84CC16' },
-    { name: 'Orange', hex: '#F97316' },
-    { name: 'Lavender', hex: '#C4B5FD' },
-];
+export function skinToneAtPosition(pos) {
+    pos = Math.max(0, Math.min(100, pos));
 
-/**
- * Get a flat array of all feather-usable colors (flags + extras + metallics)
- */
-export function getAllFeatherColors() {
-    const seen = new Set();
-    const result = [];
-
-    for (const group of caribbeanPalette) {
-        for (const c of group.colors) {
-            if (!seen.has(c.hex)) {
-                seen.add(c.hex);
-                result.push({ ...c, group: group.country });
-            }
-        }
-    }
-    for (const c of carnivalExtras) {
-        if (!seen.has(c.hex)) {
-            seen.add(c.hex);
-            result.push({ ...c, group: 'Carnival' });
-        }
-    }
-    for (const c of metallicPalette) {
-        if (!seen.has(c.hex)) {
-            seen.add(c.hex);
-            result.push({ ...c, group: 'Metallic' });
+    // Find surrounding stops
+    let lo = skinToneStops[0];
+    let hi = skinToneStops[skinToneStops.length - 1];
+    for (let i = 0; i < skinToneStops.length - 1; i++) {
+        if (pos >= skinToneStops[i].pos && pos <= skinToneStops[i + 1].pos) {
+            lo = skinToneStops[i];
+            hi = skinToneStops[i + 1];
+            break;
         }
     }
 
-    return result;
+    const t = hi.pos === lo.pos ? 0 : (pos - lo.pos) / (hi.pos - lo.pos);
+    const r = Math.round(lo.r + t * (hi.r - lo.r));
+    const g = Math.round(lo.g + t * (hi.g - lo.g));
+    const b = Math.round(lo.b + t * (hi.b - lo.b));
+
+    return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
 }
+
+/**
+ * Build a CSS linear-gradient string for the skin tone slider track.
+ */
+export function skinToneGradientCSS() {
+    return 'linear-gradient(to right, ' +
+        skinToneStops.map(s =>
+            `rgb(${s.r},${s.g},${s.b}) ${s.pos}%`
+        ).join(', ') + ')';
+}
+

@@ -4,13 +4,9 @@
  */
 
 import { getState, setState, addZoneLayer, removeZoneLayer, setZoneLayer } from './state.js';
-import { SILHOUETTES } from './silhouettes.js';
 import { FRAMES } from './frames.js';
-import { FEATHER_TYPES } from './feathers.js';
-import {
-    caribbeanPalette, carnivalExtras, metallicPalette,
-    skinTonePalette, getAllFeatherColors,
-} from './palette.js';
+import { FEATHER_COLORS, getFeatherUrl } from './feathers.js';
+import { metallicPalette } from './palette.js';
 
 const stepContent = document.getElementById('step-content');
 const stepTitle = document.getElementById('step-title');
@@ -20,7 +16,6 @@ const dots = document.querySelectorAll('.step-dot');
 
 const STEP_TITLES = [
     '', // 0-indexed padding
-    'Choose Your Figure',
     'Choose Backpack Shape',
     'Design Your Wings',
     'Add Accents',
@@ -30,7 +25,7 @@ const STEP_TITLES = [
 export function initUI(onRender) {
     btnNext.addEventListener('click', () => {
         const s = getState();
-        if (s.step < 5) {
+        if (s.step < 4) {
             setState({ step: s.step + 1 });
             renderStep(onRender);
         }
@@ -63,7 +58,7 @@ export function renderStep(onRender) {
 
     // Update nav buttons
     btnBack.disabled = step === 1;
-    if (step === 5) {
+    if (step === 4) {
         btnNext.textContent = 'Share';
         btnNext.className = 'btn btn-share';
     } else {
@@ -73,61 +68,16 @@ export function renderStep(onRender) {
 
     // Render step content
     switch (step) {
-        case 1: renderSilhouetteStep(onRender); break;
-        case 2: renderFrameStep(onRender); break;
-        case 3: renderZoneStep(onRender); break;
-        case 4: renderAccentStep(onRender); break;
-        case 5: renderPreviewStep(onRender); break;
+        case 1: renderFrameStep(onRender); break;
+        case 2: renderZoneStep(onRender); break;
+        case 3: renderAccentStep(onRender); break;
+        case 4: renderPreviewStep(onRender); break;
     }
 
     onRender();
 }
 
-// ===== Step 1: Silhouette =====
-function renderSilhouetteStep(onRender) {
-    const s = getState();
-
-    let html = '<div class="selection-grid">';
-    for (const sil of SILHOUETTES) {
-        const selected = s.silhouetteId === sil.id ? 'selected' : '';
-        html += `<button class="selection-item ${selected}" data-sil="${sil.id}">
-            <div style="color:${s.skinTone}">${sil.svg()}</div>
-        </button>`;
-    }
-    html += '</div>';
-
-    html += '<div class="palette-section" style="margin-top:0.75rem">';
-    html += '<div class="palette-label">Skin Tone</div>';
-    html += '<div class="palette-grid">';
-    for (const tone of skinTonePalette) {
-        const selected = s.skinTone === tone.hex ? 'selected' : '';
-        html += `<button class="palette-swatch ${selected}"
-                    style="background:${tone.hex}" data-tone="${tone.hex}"
-                    aria-label="${tone.name}"></button>`;
-    }
-    html += '</div></div>';
-
-    stepContent.innerHTML = html;
-
-    // Bind events
-    stepContent.querySelectorAll('[data-sil]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            setState({ silhouetteId: btn.dataset.sil });
-            renderSilhouetteStep(onRender);
-            onRender();
-        });
-    });
-
-    stepContent.querySelectorAll('[data-tone]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            setState({ skinTone: btn.dataset.tone });
-            renderSilhouetteStep(onRender);
-            onRender();
-        });
-    });
-}
-
-// ===== Step 2: Frame =====
+// ===== Step 1: Frame =====
 function renderFrameStep(onRender) {
     const s = getState();
 
@@ -165,7 +115,7 @@ function getFrameIcon(id) {
     return icons[id] || '';
 }
 
-// ===== Step 3: Zones =====
+// ===== Step 2: Zones =====
 function renderZoneStep(onRender) {
     const s = getState();
     const zone = s.activeZone;
@@ -186,10 +136,11 @@ function renderZoneStep(onRender) {
     if (layers.length > 0) {
         html += '<div class="layer-stack">';
         layers.forEach((layer, i) => {
-            const feather = FEATHER_TYPES.find(f => f.id === layer.featherId);
-            html += `<div class="layer-item">
-                <span class="layer-color-dot" style="background:${layer.color}"></span>
-                <span class="layer-name">${feather?.name || layer.featherId}</span>
+            const color = FEATHER_COLORS.find(c => c.id === layer.featherColor);
+            html += `<div class="layer-item${i === layers.length - 1 ? ' layer-active' : ''}" data-select-layer="${i}">
+                <img class="layer-thumb" src="${getFeatherUrl(layer.featherColor)}"
+                     alt="${color?.name || layer.featherColor}" width="24" height="36">
+                <span class="layer-name">${color?.name || layer.featherColor}</span>
                 <button class="layer-remove" data-remove="${i}" aria-label="Remove layer">&times;</button>
             </div>`;
         });
@@ -201,8 +152,9 @@ function renderZoneStep(onRender) {
 
     // If there are layers, show controls for the last one
     if (layers.length > 0) {
-        const activeLayer = layers[layers.length - 1];
-        html += renderLayerControls(activeLayer, layers.length - 1);
+        const activeIdx = layers.length - 1;
+        const activeLayer = layers[activeIdx];
+        html += renderLayerControls(activeLayer, activeIdx);
     }
 
     stepContent.innerHTML = html;
@@ -217,7 +169,8 @@ function renderZoneStep(onRender) {
 
     // Bind remove buttons
     stepContent.querySelectorAll('[data-remove]').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             removeZoneLayer(zone, parseInt(btn.dataset.remove));
             renderZoneStep(onRender);
             onRender();
@@ -241,46 +194,15 @@ function renderZoneStep(onRender) {
 function renderLayerControls(layer, index) {
     let html = '<div style="margin-top:0.75rem">';
 
-    // Feather type picker
-    html += '<div class="feather-picker">';
-    for (const ft of FEATHER_TYPES) {
-        const selected = layer.featherId === ft.id ? 'selected' : '';
-        html += `<button class="feather-option ${selected}" data-feather="${ft.id}">
-            <div style="width:2rem;height:3rem;overflow:hidden">${ft.svg()}</div>
-            <span class="feather-label">${ft.name}</span>
+    // Feather color picker — thumbnail grid
+    html += '<div class="feather-color-grid">';
+    for (const fc of FEATHER_COLORS) {
+        const selected = layer.featherColor === fc.id ? 'selected' : '';
+        html += `<button class="feather-color-option ${selected}" data-feather-color="${fc.id}"
+                    title="${fc.name}">
+            <img src="${getFeatherUrl(fc.id)}" alt="${fc.name}" loading="lazy">
         </button>`;
     }
-    html += '</div>';
-
-    // Color palette — grouped by country
-    html += '<div style="max-height:8rem; overflow-y:auto; margin-bottom:0.5rem">';
-    for (const group of caribbeanPalette) {
-        html += `<div class="palette-section">`;
-        html += `<div class="palette-label">${group.country}</div>`;
-        html += `<div class="palette-grid">`;
-        for (const c of group.colors) {
-            const selected = layer.color === c.hex ? 'selected' : '';
-            html += `<button class="palette-swatch ${selected}"
-                style="background:${c.hex}" data-color="${c.hex}"></button>`;
-        }
-        html += `</div></div>`;
-    }
-    // Carnival extras
-    html += `<div class="palette-section"><div class="palette-label">Carnival</div><div class="palette-grid">`;
-    for (const c of carnivalExtras) {
-        const selected = layer.color === c.hex ? 'selected' : '';
-        html += `<button class="palette-swatch ${selected}"
-            style="background:${c.hex}" data-color="${c.hex}"></button>`;
-    }
-    html += `</div></div>`;
-    // Metallics
-    html += `<div class="palette-section"><div class="palette-label">Metallic</div><div class="palette-grid">`;
-    for (const c of metallicPalette) {
-        const selected = layer.color === c.hex ? 'selected' : '';
-        html += `<button class="palette-swatch ${selected}"
-            style="background:${c.hex}" data-color="${c.hex}"></button>`;
-    }
-    html += `</div></div>`;
     html += '</div>';
 
     // Sliders
@@ -306,19 +228,10 @@ function renderLayerControls(layer, index) {
 function bindLayerControls(zone, index, onRender) {
     if (index < 0) return;
 
-    // Feather type
-    stepContent.querySelectorAll('[data-feather]').forEach(btn => {
+    // Feather color selection
+    stepContent.querySelectorAll('[data-feather-color]').forEach(btn => {
         btn.addEventListener('click', () => {
-            setZoneLayer(zone, index, { featherId: btn.dataset.feather });
-            renderZoneStep(onRender);
-            onRender();
-        });
-    });
-
-    // Color
-    stepContent.querySelectorAll('[data-color]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            setZoneLayer(zone, index, { color: btn.dataset.color });
+            setZoneLayer(zone, index, { featherColor: btn.dataset.featherColor });
             renderZoneStep(onRender);
             onRender();
         });
@@ -333,7 +246,7 @@ function bindLayerControls(zone, index, onRender) {
     });
 }
 
-// ===== Step 4: Accents =====
+// ===== Step 3: Accents =====
 function renderAccentStep(onRender) {
     const s = getState();
 
@@ -394,7 +307,7 @@ function renderAccentStep(onRender) {
     });
 }
 
-// ===== Step 5: Preview & Share =====
+// ===== Step 4: Preview & Share =====
 function renderPreviewStep(onRender) {
     let html = `<div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:0.5rem 0">
         <p style="font-size:0.8rem;color:var(--white-soft);text-align:center">
