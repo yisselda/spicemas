@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Backpack Builder — Spicemas 2026</title>
+    <meta name="description" content="Design your own carnival backpack wings for Spicemas 2026. Choose feathers, colors, and share your creation.">
+    <meta name="theme-color" content="#1a0a2e">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Build Your Backpack — Spicemas 2026">
+    <meta property="og:description" content="Design your carnival backpack wings and share the vibe.">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="builder-app">
+        <!-- Preview area -->
+        <div class="builder-preview">
+            <canvas id="builder-canvas"></canvas>
+        </div>
+
+        <!-- Bottom sheet controls -->
+        <div class="builder-controls">
+            <div class="builder-steps">
+                <div class="step-indicator">
+                    <span class="step-dot active" data-step="1"></span>
+                    <span class="step-dot" data-step="2"></span>
+                    <span class="step-dot" data-step="3"></span>
+                    <span class="step-dot" data-step="4"></span>
+                    <span class="step-dot" data-step="5"></span>
+                </div>
+                <h2 class="step-title" id="step-title">Choose Your Figure</h2>
+            </div>
+
+            <div class="step-content" id="step-content">
+                <!-- Step content injected by JS -->
+            </div>
+
+            <div class="step-nav">
+                <button class="btn btn-back" id="btn-back" disabled>Back</button>
+                <button class="btn btn-next" id="btn-next">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/builder-main.js"></script>
+</body>
+</html>

@@ -200,6 +200,25 @@
     color: var(--white-muted);
 }
 
+.builder-link {
+    display: inline-block;
+    padding: 0.6rem 1.5rem;
+    background: var(--warm-gold);
+    color: var(--deep-purple);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 100px;
+    letter-spacing: 0.03em;
+    transition: filter 0.15s, transform 0.15s;
+}
+
+.builder-link:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
 /* ===== Responsive — Tablet & Up ===== */
 @media (min-width: 600px) {
     .hero {
