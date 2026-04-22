@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Spicemas 2026 — Grenada Carnival Countdown</title>
+    <meta name="description" content="Countdown to Spicemas 2026, Grenada's carnival. August 10-11, 2026. The Spice Isle comes alive.">
+    <meta name="theme-color" content="#1a0a2e">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Spicemas 2026 — Grenada Carnival">
+    <meta property="og:description" content="The countdown is on. August 10-11, 2026.">
+    <meta property="og:type" content="website">
+
+    <!-- Preload font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <canvas id="confetti-canvas"></canvas>
+
+    <main class="hero">
+        <div class="hero-content">
+            <div class="top-section">
+                <p class="tagline">Grenada Carnival</p>
+                <h1 class="title">
+                    <span class="title-spice">Spice</span><span class="title-mas">mas</span>
+                    <span class="title-year">2026</span>
+                </h1>
+            </div>
+
+            <div class="countdown" id="countdown" aria-label="Countdown to Spicemas 2026">
+                <div class="countdown-unit">
+                    <span class="countdown-number" id="days">000</span>
+                    <span class="countdown-label">Days</span>
+                </div>
+                <div class="countdown-separator" aria-hidden="true">:</div>
+                <div class="countdown-unit">
+                    <span class="countdown-number" id="hours">00</span>
+                    <span class="countdown-label">Hours</span>
+                </div>
+                <div class="countdown-separator" aria-hidden="true">:</div>
+                <div class="countdown-unit">
+                    <span class="countdown-number" id="minutes">00</span>
+                    <span class="countdown-label">Minutes</span>
+                </div>
+                <div class="countdown-separator" aria-hidden="true">:</div>
+                <div class="countdown-unit">
+                    <span class="countdown-number" id="seconds">00</span>
+                    <span class="countdown-label">Seconds</span>
+                </div>
+            </div>
+
+            <div class="bottom-section">
+                <div class="date-badge">
+                    <span class="date-icon" aria-hidden="true">&#9830;</span>
+                    <span>August 10 &ndash; 11, 2026</span>
+                    <span class="date-divider" aria-hidden="true">&middot;</span>
+                    <span>Grenada</span>
+                    <span class="date-icon" aria-hidden="true">&#9830;</span>
+                </div>
+                <p class="subtitle">The Spice Isle comes alive</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

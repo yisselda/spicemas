@@ -1,0 +1,372 @@
+/* ===== Reset & Base ===== */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Grenada-inspired palette */
+    --red: #CE1126;
+    --gold: #F7D036;
+    --green: #007A3D;
+
+    /* Extended palette from costume inspo */
+    --deep-purple: #1a0a2e;
+    --rich-purple: #2d1458;
+    --hot-pink: #e8175d;
+    --coral: #ff6b4a;
+    --cyan: #00d4aa;
+    --warm-gold: #ffc857;
+
+    /* Neutrals */
+    --white: #ffffff;
+    --white-soft: rgba(255, 255, 255, 0.85);
+    --white-muted: rgba(255, 255, 255, 0.5);
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--deep-purple);
+    color: var(--white);
+    overflow: hidden;
+    height: 100dvh;
+    width: 100vw;
+    position: relative;
+}
+
+/* ===== Confetti Canvas ===== */
+#confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ===== Background Gradient ===== */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(ellipse at 20% 80%, rgba(206, 17, 38, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(0, 122, 61, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(45, 20, 88, 0.8) 0%, transparent 70%),
+        radial-gradient(ellipse at 60% 90%, rgba(232, 23, 93, 0.1) 0%, transparent 40%);
+    z-index: 0;
+    animation: bgShift 12s ease-in-out infinite alternate;
+}
+
+@keyframes bgShift {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* ===== Hero Layout ===== */
+.hero {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh;
+    padding: 2rem 1.25rem;
+    text-align: center;
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+    flex: 1;
+    max-width: 600px;
+    width: 100%;
+}
+
+/* ===== Top Section (Title) ===== */
+.tagline {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--warm-gold);
+    margin-bottom: 0.5rem;
+}
+
+.title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    line-height: 0.9;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0 0.15em;
+}
+
+.title-spice {
+    font-size: clamp(3.5rem, 12vw, 7rem);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--warm-gold) 40%, var(--white) 70%, var(--gold) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 4s ease-in-out infinite;
+}
+
+.title-mas {
+    font-size: clamp(3.5rem, 12vw, 7rem);
+    background: linear-gradient(135deg, var(--hot-pink) 0%, var(--coral) 40%, var(--red) 70%, var(--hot-pink) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 4s ease-in-out infinite 0.5s;
+}
+
+.title-year {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    color: var(--white-soft);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    width: 100%;
+    margin-top: 0.25rem;
+}
+
+@keyframes shimmer {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* ===== Countdown ===== */
+.countdown {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1;
+    max-width: 5.5rem;
+}
+
+.countdown-number {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.2rem, 8vw, 4.5rem);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--white);
+    position: relative;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Glow behind numbers */
+.countdown-number::after {
+    content: attr(data-value);
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: inherit;
+    font-weight: inherit;
+    color: var(--warm-gold);
+    opacity: 0.15;
+    filter: blur(12px);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.countdown-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--white-muted);
+}
+
+.countdown-separator {
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    font-weight: 300;
+    color: var(--white-muted);
+    padding-top: 0.25rem;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+}
+
+/* ===== Bottom Section ===== */
+.bottom-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.date-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--white-soft);
+    padding: 0.5rem 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.date-icon {
+    color: var(--warm-gold);
+    font-size: 0.5rem;
+}
+
+.date-divider {
+    color: var(--white-muted);
+}
+
+.subtitle {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: var(--white-muted);
+    letter-spacing: 0.05em;
+    font-style: italic;
+}
+
+/* ===== Responsive — Tablet & Up ===== */
+@media (min-width: 600px) {
+    .hero {
+        padding: 3rem 2rem;
+    }
+
+    .hero-content {
+        gap: 3rem;
+        max-width: 700px;
+    }
+
+    .tagline {
+        font-size: 0.85rem;
+        letter-spacing: 0.4em;
+    }
+
+    .countdown {
+        gap: 1rem;
+    }
+
+    .countdown-unit {
+        max-width: 8rem;
+        gap: 0.6rem;
+    }
+
+    .countdown-label {
+        font-size: 0.7rem;
+        letter-spacing: 0.25em;
+    }
+
+    .date-badge {
+        font-size: 0.9rem;
+        padding: 0.6rem 1.5rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+}
+
+/* ===== Desktop ===== */
+@media (min-width: 1024px) {
+    .hero-content {
+        max-width: 900px;
+        gap: 3.5rem;
+    }
+
+    .countdown {
+        gap: 1.5rem;
+    }
+
+    .countdown-unit {
+        max-width: 10rem;
+    }
+
+    .date-badge {
+        font-size: 1rem;
+        gap: 0.75rem;
+    }
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    .countdown-separator {
+        opacity: 0.5;
+    }
+}
+
+/* ===== Landscape phones ===== */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero-content {
+        gap: 1rem;
+    }
+
+    .tagline {
+        font-size: 0.65rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .title-spice,
+    .title-mas {
+        font-size: 2.5rem;
+    }
+
+    .title-year {
+        font-size: 1rem;
+        margin-top: 0.1rem;
+    }
+
+    .countdown-number {
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 0.75rem;
+    }
+}
